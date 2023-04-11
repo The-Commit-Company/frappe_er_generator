@@ -14,9 +14,11 @@ $ bench get-app https://github.com/The-Commit-Company/frappe_er_generator.git
 $ bench --site site_name install-app frappe_er_generator
 ```
 
-Call `get_erd` function for generating ERD by passing list of doctypes as argument.
+1. Call `get_erd` function for generating ERD by passing list of doctypes as argument.
 
 path = `api/method/frappe_er_generator.frappe_er_generator.er_generator.get_erd?doctypes = ["DocType1", "DocType2"]`
+
+2. Call `get_whitelist_methods_in_app` function for fetching all whitelisted methods in app, by passing app name as argument. `app` is argument name.
 
 #### Note:
 
@@ -28,7 +30,11 @@ $ brew install graphviz
 
 #### Output:
 
+1. ERD in PNG format
+
 ![erd](https://user-images.githubusercontent.com/59503001/231124012-c8bb246e-9159-427c-8cd7-b36d3359e247.png)
+
+2. Output of`get_whitelist_methods_in_app`
 
 #### License
 

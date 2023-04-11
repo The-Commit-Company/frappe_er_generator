@@ -3,8 +3,9 @@ import os
 
 
 @frappe.whitelist()
-def get_whitelist_methods_in_app():
-    directory = frappe.get_app_path('emotive_app')
+def get_whitelist_methods_in_app(app):
+    # directory = frappe.get_app_path('emotive_app')
+    directory = frappe.get_app_path(app)
 
     whitelisted_functions = []
 
