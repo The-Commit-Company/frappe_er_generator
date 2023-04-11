@@ -1,15 +1,17 @@
-## Frappe Er Generator
+## Frappe ERD Generator
 
 ERD generator for frappe doctypes
 
-#### License
-
-MIT
-
-#### Installation
+#### Download
 
 ```bash
-$ bench get-app frappe_er_generator
+$ bench get-app https://github.com/The-Commit-Company/frappe_er_generator.git
+```
+
+#### Install
+
+```bash
+$ bench --site site_name install-app frappe_er_generator
 ```
 
 Call `get_erd` function for generating ERD by passing list of doctypes as argument.
@@ -23,6 +25,11 @@ If got error while calling API - "RuntimeError: Make sure the Graphviz executabl
 ```bash
 $ brew install graphviz
 ```
+
 #### Output:
 
 ![erd](https://user-images.githubusercontent.com/59503001/231124012-c8bb246e-9159-427c-8cd7-b36d3359e247.png)
+
+#### License
+
+MIT
