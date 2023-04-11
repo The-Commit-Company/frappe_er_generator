@@ -23,3 +23,6 @@ If got error while calling API - "RuntimeError: Make sure the Graphviz executabl
 ```bash
 $ brew install graphviz
 ```
+#### Output:
+
+![erd](https://user-images.githubusercontent.com/59503001/231124012-c8bb246e-9159-427c-8cd7-b36d3359e247.png)
