@@ -51,11 +51,11 @@ def get_doctype_json():
 
 
 @frappe.whitelist()
-def get_erd(doctypes):
+def get_erd():
     # 1. This is very generic function only have to pass list of doctypes
     # 2. This function will generate ERD for all the doctypes passed
 
-    # doctypes = get_doctypes_from_module('CRM')['doctype']
+    doctypes = get_doctypes_from_module('CRM')['doctype']
 
     # json_list is list of doctype json data(meta data)
     json_list = []
@@ -128,8 +128,12 @@ def get_table(data, link_list, doctypes):
     for field in data.get("fields"):
         if field.get('fieldtype') not in remove_fieldtype:
             # add each field as a row in the table
-            table_element_list.append(
-                f'<tr><td port="{field.get("fieldname")}">{field.get("label")}</td></tr>')
+            if field.get('is_custom_field'):
+                table_element_list.append(
+                    f'<tr><td bgcolor="#FEF3E2" port="{field.get("fieldname")}">{field.get("label")}</td></tr>')
+            else:
+                table_element_list.append(
+                    f'<tr><td port="{field.get("fieldname")}">{field.get("label")}</td></tr>')
         if field.get("fieldtype") == "Link":
             # get_connection function will return connection string
             connection_data = get_connection(field, data.get("name"), doctypes)
@@ -197,6 +201,9 @@ def get_graph_string(table_list, connections_string_list, fetch_from_string_list
             key [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
             <tr><td align="left" port="i1">Link</td></tr>
             <tr><td align="left" port="i2">Fetch from</td></tr>
+            <tr><td>Custom Fields</td>
+            <td cellpadding="2"><table border="1" cellpadding="8" cellspacing="0" >
+            <tr><td bgcolor="#FEF3E2"></td></tr></table></td></tr>
             </table>>]
             key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
             <tr><td port="i1">&nbsp;</td></tr>
