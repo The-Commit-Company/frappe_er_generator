@@ -32,7 +32,8 @@ $ brew install graphviz
 
 1. ERD in PNG format
 
-![erd](https://user-images.githubusercontent.com/59503001/231124012-c8bb246e-9159-427c-8cd7-b36d3359e247.png)
+![erd](https://user-images.githubusercontent.com/59503001/231471200-7717c3d4-75f5-45b2-8c2c-84d07ddd865b.png)
+
 
 2. Output of `get_whitelist_methods_in_app`
 
