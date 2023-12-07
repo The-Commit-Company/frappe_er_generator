@@ -51,11 +51,9 @@ def get_doctype_json():
 
 
 @frappe.whitelist()
-def get_erd():
+def get_erd(doctypes):
     # 1. This is very generic function only have to pass list of doctypes
     # 2. This function will generate ERD for all the doctypes passed
-
-    doctypes = get_doctypes_from_module('CRM')['doctype']
 
     # json_list is list of doctype json data(meta data)
     json_list = []
