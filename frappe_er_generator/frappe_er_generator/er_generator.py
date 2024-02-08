@@ -51,9 +51,10 @@ def get_doctype_json():
 
 
 @frappe.whitelist()
-def get_erd(doctypes):
+def get_erd(doctypes, child_tables=True, amended_from=False):
     # 1. This is very generic function only have to pass list of doctypes
     # 2. This function will generate ERD for all the doctypes passed
+    doctypes = set(doctypes)
 
     # json_list is list of doctype json data(meta data)
     json_list = []
@@ -83,7 +84,7 @@ def get_erd(doctypes):
     for doctype_data in json_list:
         # get_table function will return table string, connection_list, fetch_from
         table, connection_list, fetch_from = get_table(
-            doctype_data, link_list, doctypes)
+            doctype_data, link_list, doctypes, child_tables, amended_from)
         table_list.append(table)
         connections_string_list += connection_list
         fetch_from_string_list += fetch_from
@@ -108,7 +109,7 @@ def create_graph(graph_string):
     graph.render('erd', view=True)
 
 
-def get_table(data, link_list, doctypes):
+def get_table(data, link_list, doctypes, child_tables, amended_from):
     # data is doctype json data (meta data) link_list is list of all Link fieldtype fields objects and doctypes is list of all doctypes
     # get_table function will return table string, connection_list, fetch_from
 
@@ -132,8 +133,12 @@ def get_table(data, link_list, doctypes):
             else:
                 table_element_list.append(
                     f'<tr><td port="{field.get("fieldname")}">{field.get("label")}</td></tr>')
-        if field.get("fieldtype") == "Link":
+        if field.get("fieldtype") == "Link" and (amended_from or field.get("fieldname") != "amended_from"):
             # get_connection function will return connection string
+            connection_data = get_connection(field, data.get("name"), doctypes)
+            if connection_data:
+                connection_list.append(connection_data)
+        if field.get("fieldtype") == "Table" and child_tables:
             connection_data = get_connection(field, data.get("name"), doctypes)
             if connection_data:
                 connection_list.append(connection_data)
@@ -159,21 +164,22 @@ def get_connection(data, doctype_name, doctypes):
     # data is Link fieldtype field object, doctype_name is doctype name and doctypes is list of all doctypes
     # get_connection function will return connection string
     if data.get("options") in doctypes:
-        connection_string = f"""{"".join(c if c.isalnum() else "_" for c in doctype_name).lower()}:{data.get('fieldname')} -> {"".join(c if c.isalnum() else "_" for c in data.get("options")).lower()}:name;"""
+        source = "".join(c if c.isalnum() else "_" for c in doctype_name).lower()
+        dest = "".join(c if c.isalnum() else "_" for c in data.get("options")).lower()
+        connection_string = f"""{source}:{data.get('fieldname')} -> {dest}:name;"""
         return connection_string
-
     return None
 
 
 def get_fetch_from(data, doctype_name, link_list, doctypes):
     # data is field object of doctype which have fetch_from field, doctype_name is doctype name, link_list is list of all Link fieldtype fields objects and doctypes is list of all doctypes
     # get_fetch_from function will return fetch_from string
-    fetch_link_object = next(x for x in link_list if x.get(
-        "fieldname") == data.get("fetch_from").split(".")[0])
-    if fetch_link_object.get('options') in doctypes:
-        fetch_string = f"""{"".join(c if c.isalnum() else "_" for c in fetch_link_object.get('doctype')).lower()}:{data.get('fieldname')} -> {"".join(c if c.isalnum() else "_" for c in fetch_link_object.get('options')).lower()}:{data.get("fetch_from").split(".")[1]} [style="dashed"];"""
-        return fetch_string
-
+    for link in link_list:
+        if link.get("fieldname") == data.get("fetch_from").split(".")[0] and link.get('options' in doctypes):
+            source = "".join(c if c.isalnum() else "_" for c in link.get('doctype')).lower()
+            dest = "".join(c if c.isalnum() else "_" for c in link.get('options')).lower()
+            fetch_string = f"""{source}:{data.get('fieldname')} -> {dest}:{data.get("fetch_from").split(".")[1]} [style="dashed"];"""
+            return fetch_string
     return None
 
 
