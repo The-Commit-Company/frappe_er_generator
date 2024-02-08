@@ -91,7 +91,7 @@ def get_erd(doctypes, child_tables=True, amended_from=False):
 
     # get_graph_string function will return graph string which is used to create graph
     graph_string = get_graph_string(
-        table_list, connections_string_list, fetch_from_string_list)
+        table_list, connections_string_list, fetch_from_string_list, child_tables)
 
     # create_graph function will create graph from graph_string
     create_graph(graph_string)
@@ -164,9 +164,10 @@ def get_connection(data, doctype_name, doctypes):
     # data is Link fieldtype field object, doctype_name is doctype name and doctypes is list of all doctypes
     # get_connection function will return connection string
     if data.get("options") in doctypes:
+        table = ' [style="bold" color=blue]' if data.get("fieldtype") == 'Table' else ""
         source = "".join(c if c.isalnum() else "_" for c in doctype_name).lower()
         dest = "".join(c if c.isalnum() else "_" for c in data.get("options")).lower()
-        connection_string = f"""{source}:{data.get('fieldname')} -> {dest}:name;"""
+        connection_string = f"""{source}:{data.get('fieldname')} -> {dest}:name{table};"""
         return connection_string
     return None
 
@@ -187,11 +188,17 @@ def get_fetch_from(data, doctype_name, link_list, doctypes):
 
 
 
-def get_graph_string(table_list, connections_string_list, fetch_from_string_list):
+def get_graph_string(table_list, connections_string_list, fetch_from_string_list, child_tables):
     # join all the table, connection and fetch_from string to get graph string
     table_string = "\n\n".join(table_list)
     connections_string = "\n".join(connections_string_list)
     fetch_from_string = "\n".join(fetch_from_string_list)
+    if child_tables:
+        entry = '\n<tr><td align="left" port="i3">Child Table</td></tr>'
+        port = '\n<tr><td port="i3">&nbsp;</td></tr>'
+        key = '\nkey:i3:e -> key2:i3:w [color="blue", style=bold]'
+    else:
+        entry = port = key = ""
     graph_string = f"""
         digraph {{
             graph [pad="0.5", nodesep="0.5", ranksep="2",legend="Fetch from\\l\\nNormal Link\\l"];
@@ -208,17 +215,17 @@ def get_graph_string(table_list, connections_string_list, fetch_from_string_list
             label = "Legend";
             key [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
             <tr><td align="left" port="i1">Link</td></tr>
-            <tr><td align="left" port="i2">Fetch from</td></tr>
+            <tr><td align="left" port="i2">Fetch from</td></tr>{entry}
             <tr><td>Custom Fields</td>
             <td cellpadding="2"><table border="1" cellpadding="8" cellspacing="0" >
             <tr><td bgcolor="#FEF3E2"></td></tr></table></td></tr>
             </table>>]
             key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
             <tr><td port="i1">&nbsp;</td></tr>
-            <tr><td port="i2">&nbsp;</td></tr>
+            <tr><td port="i2">&nbsp;</td></tr>{port}
             </table>>]
             key:i1:e -> key2:i1:w 
-            key:i2:e -> key2:i2:w [style=dashed]
+            key:i2:e -> key2:i2:w [style=dashed]{key}
         }}
         }}
     """
