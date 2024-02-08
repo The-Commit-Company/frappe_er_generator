@@ -174,13 +174,17 @@ def get_connection(data, doctype_name, doctypes):
 def get_fetch_from(data, doctype_name, link_list, doctypes):
     # data is field object of doctype which have fetch_from field, doctype_name is doctype name, link_list is list of all Link fieldtype fields objects and doctypes is list of all doctypes
     # get_fetch_from function will return fetch_from string
-    for link in link_list:
-        if link.get("fieldname") == data.get("fetch_from").split(".")[0] and link.get('options' in doctypes):
-            source = "".join(c if c.isalnum() else "_" for c in link.get('doctype')).lower()
-            dest = "".join(c if c.isalnum() else "_" for c in link.get('options')).lower()
-            fetch_string = f"""{source}:{data.get('fieldname')} -> {dest}:{data.get("fetch_from").split(".")[1]} [style="dashed"];"""
-            return fetch_string
-    return None
+    try:
+        fetch_link_object = next(x for x in link_list if x.get(
+        "fieldname") == data.get("fetch_from").split(".")[0])
+    except:
+        return None
+
+    if fetch_link_object.get('options') in doctypes:
+        fetch_string = f"""{"".join(c if c.isalnum() else "_" for c in fetch_link_object.get('doctype')).lower()}:{data.get('fieldname')} -> {"".join(c if c.isalnum() else "_" for c in fetch_link_object.get('options')).lower()}:{data.get("fetch_from").split(".")[1]} [style="dashed"];"""
+        return fetch_string
+
+
 
 
 def get_graph_string(table_list, connections_string_list, fetch_from_string_list):
