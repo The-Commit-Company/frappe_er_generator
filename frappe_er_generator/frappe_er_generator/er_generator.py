@@ -54,6 +54,9 @@ def get_doctype_json():
 def get_erd(doctypes, child_tables=True, amended_from=False):
     # 1. This is very generic function only have to pass list of doctypes
     # 2. This function will generate ERD for all the doctypes passed
+    with open('erd.txt', mode='w') as f:
+        f.write(str(doctypes))
+
     doctypes = set(doctypes)
 
     # json_list is list of doctype json data(meta data)
