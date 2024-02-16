@@ -14,7 +14,7 @@ $ bench get-app https://github.com/The-Commit-Company/frappe_er_generator.git
 $ bench --site site_name install-app frappe_er_generator
 ```
 
-1. Call `get_erd` function for generating ERD by passing list of doctypes as argument.
+1. Call `get_erd` function for generating ERD by passing list of doctypes as argument. Other arguments include `child_tables` to include child table links as well as `amended_from` to include that field.
 
 path = `api/method/frappe_er_generator.frappe_er_generator.er_generator.get_erd?doctypes = ["DocType1", "DocType2"]`
 
