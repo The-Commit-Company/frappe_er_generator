@@ -1,3 +1,5 @@
+from typing import Iterable
+
 import frappe
 from frappe.config import get_modules_from_app, get_modules_from_all_apps
 import graphviz
@@ -51,13 +53,19 @@ def get_doctype_json():
 
 
 @frappe.whitelist()
-def get_erd(doctypes, child_tables=True, amended_from=False):
+def get_erd(doctypes: Iterable[str], child_tables: bool=True, omit_links: None|str|Iterable[str]=None):
+    """ doctypes: iterable of all doctypes to be placed on ERD
+        child_tables: includes child table links if True
+        omit_links: pass a single link name, an iterable of link names, or 'all' to omit all doctype self-references
+    """
     # 1. This is very generic function only have to pass list of doctypes
     # 2. This function will generate ERD for all the doctypes passed
     with open('erd.txt', mode='w') as f:
         f.write(str(doctypes))
 
     doctypes = set(doctypes)
+    if omit_links is not None and omit_links != 'all':
+        omit_links = {omit_links} if isinstance(omit_links, str) else set(omit_links)
 
     # json_list is list of doctype json data(meta data)
     json_list = []
@@ -87,7 +95,7 @@ def get_erd(doctypes, child_tables=True, amended_from=False):
     for doctype_data in json_list:
         # get_table function will return table string, connection_list, fetch_from
         table, connection_list, fetch_from = get_table(
-            doctype_data, link_list, doctypes, child_tables, amended_from)
+            doctype_data, link_list, doctypes, child_tables, omit_links)
         table_list.append(table)
         connections_string_list += connection_list
         fetch_from_string_list += fetch_from
@@ -112,7 +120,7 @@ def create_graph(graph_string):
     graph.render('erd', view=True)
 
 
-def get_table(data, link_list, doctypes, child_tables, amended_from):
+def get_table(data, link_list, doctypes, child_tables, omit_links):
     # data is doctype json data (meta data) link_list is list of all Link fieldtype fields objects and doctypes is list of all doctypes
     # get_table function will return table string, connection_list, fetch_from
 
@@ -136,7 +144,10 @@ def get_table(data, link_list, doctypes, child_tables, amended_from):
             else:
                 table_element_list.append(
                     f'<tr><td port="{field.get("fieldname")}">{field.get("label")}</td></tr>')
-        if field.get("fieldtype") == "Link" and (amended_from or field.get("fieldname") != "amended_from"):
+        if field.get("fieldtype") == "Link" and (
+        omit_links is None or 
+        (omit_links == 'all' and field.get("options") != data.get("name")) or
+        (omit_links != 'all' and field.get("fieldname") not in omit_links)):
             # get_connection function will return connection string
             connection_data = get_connection(field, data.get("name"), doctypes)
             if connection_data:
